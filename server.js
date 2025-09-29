@@ -7,17 +7,14 @@ import { connectUsingMongoose } from "./config/mongoose.config.js";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "*", // allow all origins
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"], // allow headers
-  })
-);
+const corsOptions = {
+  origin: ["https://sharda-clinics.onrender.com"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+};
 
-// Handle preflight requests explicitly
-// app.options("/*", cors());
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
