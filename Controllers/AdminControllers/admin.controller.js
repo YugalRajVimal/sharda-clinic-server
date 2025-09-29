@@ -50,33 +50,44 @@ class AdminController {
   };
 
   signin = async (req, res) => {
+    console.log("Admin signin function called.");
     const { email } = req.body;
+    console.log(`Received signin request for email: ${email}`);
+
     if (!email) {
+      console.log("Error: Email is missing in the request body.");
       return res.status(400).json({ message: "Email is required" });
     }
     try {
       const user = await AdminModel.findOne({ email });
       if (!user) {
+        console.log(`Admin not found for email: ${email}`);
         return res.status(404).json({ message: "Admin not found" });
       }
+      console.log(`Admin found for email: ${email}. Generating OTP.`);
 
       // Generate a random 6 digit OTP
       const otp = Math.floor(Math.random() * 900000) + 100000;
+      console.log(`Generated OTP: ${otp} for user: ${user.id}`);
+
       // Save OTP to the user document and set an expiration time
       await AdminModel.findByIdAndUpdate(
         user.id,
         { otp, otpExpires: new Date(Date.now() + 10 * 60 * 1000) },
         { new: true }
       );
+      console.log(`OTP saved to database for user: ${user.id}`);
 
       // Send OTP to the user's email
       const message = `Your OTP is: ${otp}`;
+      console.log(`Attempting to send OTP email to ${email}.`);
       await sendMail(email, "Sign Up OTP", message);
       console.log(`[Signup] OTP email sent to ${email}.`);
 
       res.status(200).json({ message: "OTP sent to mail successfully" });
+      console.log(`Signin successful: OTP sent to ${email}.`);
     } catch (error) {
-      console.error(error);
+      console.error("Error during admin signin:", error);
       res.status(500).json({ message: "Internal Server Error" });
     }
   };
