@@ -7,11 +7,22 @@ import { connectUsingMongoose } from "./config/mongoose.config.js";
 
 const app = express();
 
+const allowedOrigins = [
+  "https://sharda-clinics.onrender.com", // React frontend
+  "http://localhost:5173", // local dev
+];
+
 const corsOptions = {
-  origin: "*",
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-  credentials: true,
+  credentials: true, // only if you need cookies
 };
 
 app.use(cors(corsOptions));
