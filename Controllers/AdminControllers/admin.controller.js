@@ -4,6 +4,7 @@ import sendMail from "../../config/nodeMailer.config.js";
 
 import jwt from "jsonwebtoken";
 import BlogsModel from "../../Schema/blogs.schema.js";
+import VideosModel from "../../Schema/videos.schema.js";
 
 class AdminController {
   checkAuth = async (req, res) => {
@@ -181,12 +182,10 @@ class AdminController {
 
       // Optional: check if the logged-in admin owns the blog
       if (blog.admin.toString() !== req.user.id) {
-        return res
-          .status(403)
-          .json({
-            success: false,
-            message: "Unauthorized to delete this blog",
-          });
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to delete this blog",
+        });
       }
 
       await BlogsModel.findByIdAndDelete(blogId);
@@ -196,6 +195,116 @@ class AdminController {
         .json({ success: true, message: "Blog deleted successfully", blog });
     } catch (error) {
       console.error("Error deleting blog:", error);
+      return res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error" });
+    }
+  };
+
+  addVideo = async (req, res) => {
+    const { title, description } = req.body;
+
+    if (!title || !description) {
+      return res
+        .status(400)
+        .json({ message: "Title and description are required." });
+    }
+
+    try {
+      const adminId = req.user.id;
+      const admin = await AdminModel.findById(adminId);
+
+      if (!admin) {
+        return res.status(404).json({ message: "Admin not found." });
+      }
+
+      let imagePath = null;
+      let videoPath = null;
+
+      if (req.file) {
+        if (req.file.mimetype.startsWith("video")) {
+          videoPath = req.file.path;
+        } else if (req.file.mimetype.startsWith("image")) {
+          imagePath = req.file.path;
+        }
+      }
+
+      const newVideo = await VideosModel.create({
+        admin: adminId,
+        title,
+        description,
+        imagePath,
+        videoPath,
+      });
+
+      res
+        .status(201)
+        .json({ message: "Data added successfully.", data: newVideo });
+    } catch (error) {
+      console.error("Error adding Data:", error);
+      res.status(500).json({ message: "Internal Server Error." });
+    }
+  };
+
+  fetchAllVideos = async (req, res) => {
+    try {
+      const page = parseInt(req.query.page) || 1; // default to page 1
+      const limit = parseInt(req.query.limit) || 10; // default 10 blogs per request
+      const skip = (page - 1) * limit;
+
+      const total = await VideosModel.countDocuments();
+      const videos = await VideosModel.find()
+        .sort({ createdAt: -1 }) // latest first
+        .skip(skip)
+        .limit(limit);
+
+      res.status(200).json({
+        message: "Data fetched successfully.",
+        videos,
+        page,
+        totalPages: Math.ceil(total / limit),
+      });
+    } catch (error) {
+      console.error("Error fetching Data:", error);
+      res.status(500).json({ message: "Internal Server Error." });
+    }
+  };
+
+  deleteVideo = async (req, res) => {
+    const { videoId } = req.params;
+
+    if (!videoId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Data ID is required" });
+    }
+
+    try {
+      const video = await VideosModel.findById(videoId);
+
+      if (!video) {
+        return res
+          .status(404)
+          .json({ success: false, message: "Data not found" });
+      }
+
+      // Optional: check if the logged-in admin owns the blog
+      if (video.admin.toString() !== req.user.id) {
+        return res.status(403).json({
+          success: false,
+          message: "Unauthorized to delete this Data",
+        });
+      }
+
+      await VideosModel.findByIdAndDelete(videoId);
+
+      return res.status(200).json({
+        success: true,
+        message: "Data deleted successfully",
+        data: video,
+      });
+    } catch (error) {
+      console.error("Error deleting Data:", error);
       return res
         .status(500)
         .json({ success: false, message: "Internal Server Error" });

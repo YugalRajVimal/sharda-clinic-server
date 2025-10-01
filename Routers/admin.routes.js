@@ -42,4 +42,19 @@ adminRouter.delete("/blog/:blogId", jwtAdminAuth, (req, res) => {
   adminController.deleteBlog(req, res);
 });
 
+adminRouter.post(
+  "/add-video",
+  jwtAdminAuth,
+  upload.single("file"), // one file, optional
+  (req, res) => adminController.addVideo(req, res)
+);
+
+adminRouter.get("/videos", (req, res) => {
+  adminController.fetchAllVideos(req, res);
+});
+
+adminRouter.delete("/video/:videoId", jwtAdminAuth, (req, res) => {
+  adminController.deleteVideo(req, res);
+});
+
 export default adminRouter;
