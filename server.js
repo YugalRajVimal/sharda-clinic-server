@@ -55,6 +55,12 @@ app.post("/send-mail", (req, res) => {
     phone,
   } = req.body;
 
+  console.log(req.body);
+  console.log(process.env.Send_Mailer_User);
+  console.log(process.env.Mailer_User);
+  console.log(process.env.Mailer_Pass);
+
+
   const htmlContent = `
     <div style="font-family: Arial, sans-serif; background-color: #f8f9fa; padding: 20px;">
       <div style="max-width: 600px; margin: auto; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
