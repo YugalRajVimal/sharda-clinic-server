@@ -57,4 +57,8 @@ adminRouter.delete("/video/:videoId", jwtAdminAuth, (req, res) => {
   adminController.deleteVideo(req, res);
 });
 
+adminRouter.get("/dashboard-details", jwtAdminAuth, (req, res) => {
+  adminController.getDashboardDetails(req, res);
+});
+
 export default adminRouter;

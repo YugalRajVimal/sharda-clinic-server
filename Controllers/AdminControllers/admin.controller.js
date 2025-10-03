@@ -310,6 +310,31 @@ class AdminController {
         .json({ success: false, message: "Internal Server Error" });
     }
   };
+
+  getDashboardDetails = async (req, res) => {
+    try {
+      const blogCount = await BlogsModel.countDocuments();
+      const videoArticleCount = await VideosModel.countDocuments({
+        videoPath: { $ne: null },
+      });
+      const imageArticleCount = await VideosModel.countDocuments({
+        imagePath: { $ne: null },
+      });
+      res
+        .status(200)
+        .json({
+          success: true,
+          blogCount,
+          videoArticleCount,
+          imageArticleCount,
+        });
+    } catch (error) {
+      console.error("Error fetching dashboard:", error);
+      res
+        .status(500)
+        .json({ success: false, message: "Internal Server Error." });
+    }
+  };
 }
 
 export default AdminController;
