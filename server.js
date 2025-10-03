@@ -10,7 +10,7 @@ import { connectUsingMongoose } from "./config/mongoose.config.js";
 const app = express();
 
 const allowedOrigins = [
-  "https://sharda-clinics.onrender.com", // React frontend
+  "https://shardaclinics.in", // React frontend
   "http://localhost:5173", // local dev
 ];
 
